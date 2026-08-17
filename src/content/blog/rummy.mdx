@@ -1,0 +1,100 @@
+---
+title: "Infinite Rummy in the Age of Quarantine"
+author: "Matt Roumaya"
+date: "04-26-2020"
+modified: "08-16-2026"
+categories: [R, dataviz, cats]
+---
+
+import { Image } from "astro:assets";
+import scoreCard from "../../assets/rummy-score.jpg";
+import ggBump from "../../assets/rummy-ggbump.png";
+import cumulative from "../../assets/rummy-cumulative.png";
+import babies from "../../assets/rummy-babies.jpg";
+import biggerBabies from "../../assets/rummy-bigger babies.jpg";
+
+**Note:** After switching from Quarto to Astro, I have removed R code execution from my blog. I will always have a love for R but have not been active in the language for over two years. At some point I would love to set up a Plumber API to restore the codeblocks, but am going to handwaive that effort for now.
+
+In these _unprecedented times_, my wife Molly and I have been playing infinite rounds of Rummy. Since I don't have any high-quality posts yet (and probably won't any time soon), I'm just going to graph our endless rounds until we're out of the weeds. My friend and former colleague (and data pro!) Steph showed me how she was graphing nightly games of Rummy 500 with her wife, and I found the idea too fun to not steal!
+
+I spent all weekend getting up and running with the deadly [blogdown](https://bookdown.org/yihui/blogdown/) + [Hugo](https://gohugo.io/) combo, and I'm ready to share my trivial data insights with the world!
+
+Molly and I love board games like [7 Wonders Duel](https://boardgamegeek.com/boardgame/173346/7-wonders-duel/), [Codenames](https://boardgamegeek.com/boardgame/178900/codenames), and some good ol' [Catan](https://boardgamegeek.com/boardgame/13/catan) when we can round up... anyone else...but we have quickly come to terms that we'll be riding out the [stay at home order](https://www.phila.gov/2020-03-22-city-issues-stay-at-home-order-clarifying-restrictions-on-business-activity-in-philadelphia/) for quite a while.
+
+(If you're only looking for cats and kittens, scroll to the end)
+
+**Let's take a first glimpse at our scorecard data:**
+
+<Image src={scoreCard} width="700px" alt="rummy score card" />
+While the raw data explicitly shows that I'm a loser, we'll see if that's actually
+the case after some cleaning and viz.
+
+**Here's the structure of the `tribble` of our cumulative rounds:**
+
+```
+library(tidyverse)
+
+rummy <- tribble(
+  ~Round,~Molly,~Matt,
+  1,159,167,
+  2,90,100,
+  ...
+)
+```
+
+Last night during a bout of insomnia, I came across the [new CRAN release for `ggbump`](https://github.com/davidsjoberg/ggbump) and had to give it a shot, and am pretty excited to find some more uses for it. This definitely isn't the best visualization I've made, and would have been more interesting with a third player (maybe the [thruple from HGTV's **House Hunters**?](https://www.huffpost.com/entry/throuple-house-hunters-hgtv_n_5e46d120c5b64d860fca24df))
+
+Anyway, to work with `ggbump`, we just need to rank each round. We did tie during round 7, so `ties.method = random` will make the decision for us.
+
+```
+library(ggbump)
+library(cowplot)
+library(wesanderson)
+
+rummy_bump <- rummy_wider %>%
+  group_by(Round) %>%
+  mutate(rank = rank(Score,ties.method = "random")) %>%
+  ungroup()
+
+ggplot(rummy_bump, aes(Round,rank,color = Player)) +
+  geom_point(size = 7) +
+  geom_bump(size = 2, smooth = 4)+
+  scale_x_continuous(limits = c(-0.6,25.6),breaks = seq(1,25,1)) +
+  theme_minimal_grid(font_size = 14, line_size = 0)+
+  theme(panel.grid.major = element_blank(),
+        axis.ticks = element_blank()) +
+  scale_y_continuous(breaks = c(1,2), labels = c("1" = "Loser", "2" = "Winner")) +
+  labs(y = "") +
+  scale_color_manual(values = wes_palette(n=2, name = "Moonrise3"))
+```
+
+<div class="inlineImageContainer">
+  <Image
+    src={ggBump}
+    width="700px"
+    alt="ggBump visualization of rummy scores per round"
+  />
+</div>
+
+We still haven't decided how we're going to end the game, and with no end to the pandemic in sight, we still have a lot more Rummy in our future. Should we play Rummy 5,000? 25,000?
+
+**And one more graph of our cumulative scores, for good measure:**
+
+<Image
+  src={cumulative}
+  alt="line chart of cumulative rummy scores"
+  width="700px"
+/>
+
+And as a final note, this post and website were _conceptualized_ on 4/26, which is Phil and Mango's 5th birthday!!
+
+**HAPPY BIRTHDAY TO MANGO AND PHIL!**
+
+<div class="kittens">
+  <Image src={babies} alt="mango and phil as kittens" width="400px" />
+  <Image
+    src={biggerBabies}
+    alt="mango and phil as bigger kittens on a chair together"
+    width="400px"
+  />
+</div>

@@ -1,0 +1,25 @@
+---
+import "../styles/global.css";
+import type { CollectionEntry } from "astro:content";
+type Props = CollectionEntry<"blog">["data"];
+const { title, description, date, updatedDate, heroImage } = Astro.props;
+---
+
+<html lang="en">
+  <meta charset="utf-8" />
+  <body>
+    <main>
+      <article>
+        <div class="prose">
+          <div class="title">
+            <div class="date"></div>
+            <h2>{title}</h2>
+            <h3>{date}</h3>
+            <hr />
+          </div>
+          <slot />
+        </div>
+      </article>
+    </main>
+  </body>
+</html>

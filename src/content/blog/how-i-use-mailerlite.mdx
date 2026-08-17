@@ -1,0 +1,56 @@
+---
+title: "How I Use MailerLite to Send a Newsletter (For Free)"
+author: "Matt Roumaya"
+date: "03-22-2024"
+categories: [Node.js, metal, cli tool, MailerLite]
+---
+
+import { Image } from "astro:assets";
+import mailerLiteTemplate from "../../assets/mailerliteTemplate.png";
+import cliTool from "../../assets/cliTool.png";
+
+Even though the last post I published (almost a year ago!) was about `node`, I haven't been using it too much lately. However, every week when I send out the [phillymetal newsletter](https://phillymetal.net/newsletter "URL to sign up for the phillymetal.net newsletter") that contains all recently added shows to the site, a little cli tool written in `node` does all of the hard work.
+
+## I'm ~~Cheap~~ Frugal
+
+Enter [MailerLite](https://www.mailerlite.com/pricing "URL to MailerLite homepage"). After attempting to bring back a version of the OG phillymetal.com, I posted about it on Reddit to spread the word, and a few people were interested in a newsletter to stay on top of new heavy shows happening in the area.
+
+So far, I only have great things to say about MailerLite and have paid exactly \$0 to use it since April 2023.
+
+- Sent \~ 2,000 emails - one email per week X \~ 75 subscribers as of today.
+
+- Custom templates on the free tier!?^\*^
+
+- Easy custom-ish HTML/CSS to embed a sign-up URL. Ever used [`dangerouslySetInnerHTML`](https://github.com/mattroumaya/phillymetalv2/blob/main/src/components/Newsletter/Newsletter.jsx#L4)?
+
+- Fairly robust tracking metrics - at least compared to Netlify where this page is hosted. \$9/month for simple analytics?! Come on.
+
+^\*^Maybe: I think I might have gotten accidentally grandfathered in. Or there's a bug - in either case, please don't tell them. This is what I see when I try to make or modify a template, but I can use a previous template if I **create a campaign**.
+
+<Image src={mailerLiteTemplate} alt="Mailerlite Template" />
+
+## I Hate Newsletters
+
+No I don't, but I do hate when any person, place, or thing emails relentlessly. There is only so much content I'm interested in, and J.Crew Factory deserves to be banned from ever sending emails again.
+
+My goal for the phillymetal newsletter is simple - once a week, a simple listing/index of all new content added in the past week. Newsletter subscribers could just check one email per week and see all new content - they don't even have to go to the website.
+
+After getting more familiar with [supabase](https://supabase.com/ "URL to supabase homepage"), I knew that I could write a basic query and have all of the data that has been added to the site in the past week, so it's just a matter of getting in into shape to send out via MailerLite.
+
+## The CLI
+
+<Image src={cliTool} alt="cli tool screenshot" />
+
+(Almost) every Monday, I'll open my laptop, usually while making coffee in the morning, and type `phillymetal` which does the following:
+
+- Queries `supabase` for all recently added shows (added in the past 8 days, excluding the current day).
+
+- Uses a template to construct raw HTML that I can paste into the MailerLite email template.
+
+- Opens a web browser and navigates to the MailerLite login.
+
+From there, I just create a new campaign, copy/paste the raw HTML, and send the newsletter. It usually takes about one minute tops.
+
+If I was less cheap, I could pay for a better tier of MailerLite and fully automate this, but I kind of enjoy having a Monday activity. Also, sometimes there isn't much to add throughout the week and it's best not to send a newsletter with 2 new additions. I know that this part could also be automated, but idk, it kind of keeps me more on top of searching for shows and finding new music.
+
+I'm pretty sure I followed [Rushan's Medium post](https://dev.to/rushankhan1/build-a-cli-with-node-js-4jbi) to learn how to make a CLI in `node` - I just quickly skimmed it and it looks very familiar, so many thanks to Rushan.

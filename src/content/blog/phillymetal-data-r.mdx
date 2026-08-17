@@ -1,0 +1,76 @@
+---
+title: "phillymetaldata R package"
+author: "Matt Roumaya"
+date: "10-22-2022"
+categories: [R, R package, metal]
+---
+
+import { YouTube } from "astro-embed";
+
+In April 2022, I launched [phillymetal.net](www.phillymetal.net) as a way to stay connected to the local music scene that I've rarely engaged with since COVID-19 ruined everything.
+
+With the immense help of my amazingly talented colleage and R/JavaScript developer Maya Gans, I've jumped head first into the world of JavaScript and am totally hooked. In future posts, I'm planning to write up my experience of learning JavaScript as a (primarily) R user.
+
+Even though I'm stoked about JS, I'm still just as much of an R nerd as ever, and wanted to make all of the data on phillymetal.net freely available whether it's in R, a Google Sheet, .csv file, or any other way that could help people in the Philadelphia area find cool shows to go to. So for now, I'm excited to introduce a one-function R package that makes all of the data super easy to pull.
+
+Introducing the `phillymetaldata` package. You can find the repo [here](https://github.com/mattroumaya/phillymetaldata)!
+
+# Install `phillymetaldata`
+
+To install `phillymetaldata`, run:
+
+```r
+devtools::install_github('mattroumaya/phillymetaldata')
+```
+
+# Get Data
+
+Getting data is as easy as typing "get_data()". In fact, that's all you need to do:
+
+```r
+library(phillymetaldata)
+suppressMessages(library(tidyverse))
+library(gt)
+
+data <- phillymetaldata::get_data()
+```
+
+By running the code below, you can see a consolidated view of the data available from `get_data()`. I removed the unique key/id, whether the entry was validated, and the URL, just to make it a little cleaner to view.
+
+```r
+data %>%
+  head(n = 10) %>%
+  select(-c(id, validated, url)) %>%
+  gt::gt() %>%
+    cols_width(
+    added ~ px(150),
+    show_date ~ px(200),
+    description ~ px(250),
+    venue ~ px(250)
+  )
+```
+
+# Looking For a Show?
+
+If you happen to be an R user and metalhead/punk/heavy music lover, and also happen to be in the Philadelphia area, you can look for shows to check out by filtering for upcoming shows. (You can also just check out [phillymetal.net](www.phillymetal.net)).
+
+To do this, just use the `upcoming_shows_only` parameter:
+
+```r
+get_data(upcoming_shows_only = TRUE) %>%
+  head(n = 10) %>%
+  select(show_date, description, venue) %>%
+  arrange(show_date) %>%
+  gt::gt() %>%
+      cols_width(
+    show_date ~ px(200),
+    description ~ px(400),
+    venue ~ px(250)
+  )
+```
+
+That's all I have for now!
+
+I'm going to see Chat Pile tomorrow so you should check them out too:
+
+<YouTube id="74Wm1d3Dq8c" />

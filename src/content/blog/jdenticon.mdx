@@ -1,0 +1,104 @@
+---
+title: "Jdenticon for R is on CRAN"
+author: "Matt Roumaya"
+date: "04-29-2023"
+categories: [R, JavaScript, Node.js]
+---
+
+import { Image } from "astro:assets";
+import jsNode from "../../assets/jdenticon-node.png";
+import matt from "../../assets/jdenticon_100_matt.png";
+import molly from "../../assets/jdenticon_100_molly.png";
+import phil from "../../assets/jdenticon_100_phil.png";
+import mango from "../../assets/jdenticon_100_mango.png";
+import donut from "../../assets/jdenticon_100_donut.png";
+
+# Introduction
+
+My colleage Andrew and I have been super interested in combining `Node.js` and `R`, especially after coming across a compelling use case that helps us to simplify Firebase data fetching.
+
+<Image src={jsNode} alt="node logo" width="400px" />
+
+Read on to learn more about:
+
+- Why you might want to combine `Node.js` and `R`
+- How you might go about combining `Node.js` and `R`
+- What a Jdenticon/identicon is
+
+## Why?
+
+Rather than designing a multi-step process that would involve running a query in `Node.js`, and then sending the data to `R`, Andrew was able to grab the few functions that we needed directly from the [firebase npm package](https://www.npmjs.com/package/firebase).
+
+This is huge, because it enables any R user on our team to pull data without knowing any JavaScript at all. The only prerequisite is a `Node.js` installation that is already setup on our Posit Workbench server.
+
+Even though we only need to use JavaScript for a few fairly simple queries, there is still quite a bit of a learning curve for anyone who is unfamiliar. Not only is the language different than R, but there are also DevOps considerations like:
+
+- Installing `Node.js` and using `npm` to install libraries.
+- Managing and securing service account credentials.
+- Ensuring maintainability.
+- Enabling users to have the ability to customize queries when needed.
+
+Wrapping all of this functionality into a few R functions solves all of the issues above. As mentioned, `Node.js` is available for all users on Workbench. Additionally, secure credentials can be permissioned to users that need them, which is safer and less work for everyone.
+
+Since the functions are written in R, there is already built-in customization by tweaking parameters as needed. Similarly, an R user is much better equipped to maintain an R package, than needing to maintain a `Node.js` custom query that is ingested by an R package.
+
+## How?
+
+Most of this post, and the start of my understanding of this topic, is due to [Colin Fay's blog post](https://colinfay.me/node-r-package/). This was incredibly helpful for me to keep referencing, and to provide some great context for how to implement this for your own package.
+
+Instead of re-writing a (worse) version of Colin's post, I'd 100% recommend reading over it a few times and giving it a shot for your own project. Also, feel free to send me an email 📧 (matthewroumaya\@gmail.com) if you'd like to connect and troubleshoot!
+
+# What is Jdenticon?
+
+[Jdenticon](https://jdenticon.com/) is a `Node.js` library that generates identicons, which are:
+
+> An Identicon is a visual representation of a hash value, usually of an IP address, that serves to identify a user of a computer system as a form of avatar while protecting the users' privacy. [^1]
+
+[^1]: https://en.wikipedia.org/wiki/Identicon>
+
+If you've ever been on Stack Overflow, then you know what an identicon is.
+
+If you make an account, you'll automatically be given your own individual identicon, which will look something like this [^2]:
+
+<div class="jdenticons">
+  <Image src={matt} alt="matts jdenticon" width="100" height="100"/>
+    <Image src={molly} alt="mollys jdenticon" width="100" height="100"/>
+  <Image src={phil} alt="phils jdenticon" width="100" height="100"/>
+  <Image src={mango} alt="mangos jdenticon" width="100" height="100"/>
+  <Image src={donut} alt="donuts jdenticon" width="100" height="100"/>
+
+</div>
+
+[^2]: These identicons are visual representations of my family's names, including our pets Mango, Phil, and Donut. :)
+
+Speaking of Stack Overflow, I came across [this question](https://stackoverflow.com/questions/75810349/run-javascript-command-from-within-r-package/75858192#75858192) about generating identicons in R using `Node.js`, and I jumped at the opportunity to use my new knowledge.
+
+The OP's profile made it easy to find them, so I sent over an email with a minimally working R package. Dr. Morey significantly improved the package with a PR, and I'm grateful to be able to collaborate on a tiny open-source wrapper for a cool little library.
+
+The best way to look at how this package was built and structured is probably to [check it out on GitHub](https://github.com/mattroumaya/jdenticon).
+
+## How To
+
+To create your own `jdenticon`, you can run the following in R:
+
+```r
+#| eval: false
+
+library(jdenticon)
+
+jdenticon::jdenticon(
+    value = "any_value",
+    filePath = here::here("posts", "jdenticon"),
+    fileName = "my_jd"
+    )
+```
+
+Then you can use your `jdenticon`!
+
+```{ojs}
+html`<img src="my_jd.png" class="img-jdenticon">`
+```
+
+`jdenticon` is on CRAN, which I might write about in the future. I was surprised at how easy it was to submit for CRAN review, and am hoping to add a few more packages when I have the time.
+
+If you're reading this and are curious about using `Node.js` with `R`, please reach out!

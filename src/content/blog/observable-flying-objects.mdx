@@ -1,0 +1,105 @@
+---
+title: "Observable Flying Objects"
+author: "Matt Roumaya"
+date: "04-18-2023"
+categories: [R, Observable, JavaScript, NUFORC, UFO]
+image: "main.png"
+---
+
+# Random UFO Report
+
+tl;dr - 🛸 Refresh the page to see a random UFO report! 🛸
+
+- Some fields may show as `undefined` or `null` because this is a quick write-up and I'm busy! :)
+
+- If you have any suggestions or would like to get started with Observable, or want to connect in general, definitely [email me](mailto:%20matthewroumaya@gmail.com).
+
+```ojs
+//| echo: false
+
+htl.html`<h3 class='header'></h3>
+
+<div class="date"></div>
+
+
+<div class="shape"></div>
+
+
+<div class="duration"></div>
+
+<br>
+
+<a class="report-link">Link to Report</a>
+
+<br>
+
+<a class="raw-link">Link to Image</a>
+
+<br>
+
+<br>
+
+<div class="summary"></div>
+
+<img id="ufo-img" style="height: 500px">
+
+<br>`
+```
+
+# NUFORC Bot
+
+NUFORC Bot is/was a Twitter bot that scrapes UFO sightings data from the [NUFORC Data Bank](https://armoxon.substack.com/p/the-worlds-smartest-man-doesnt-want) and tweets out a summary (and image if one was provided). The bot has \~700 followers and not much engagement, but it has definitely been a fun way to learn about web scraping, bot building, and CRON jobs via GitHub Actions (repo is [here](https://github.com/mattroumaya/mufonbot)).
+
+Recently, the [World's Smartest Man](https://armoxon.substack.com/p/the-worlds-smartest-man-doesnt-want) pulled the plug on Twitter's API access for a wide range of developers, including [NUFORC Bot](https://twitter.com/nuforcbot?lang=en). For some reason, NUFORC Bot is now back up and running, but it seems like it will be short-lived.
+
+After the hostile takeover, I stopped using my personal account on Twitter, deleted the app, and planned to just let NUFORC Bot ride off into the sunset. Now that the sunset is quickly approaching, I've been trying to think of a way to reproduce a similar effect to the tweet using the data I have already collected.
+
+Having been a subscriber to [**hrbrmstr's Daily Drop**](https://dailyfinds.hrbrmstr.dev/) for a while, I've seen a ton of amazing Observable notebooks, and thought that this could be a fun project to learn Observable and see . The impending demise of NUFORC Bot was as good an excuse as any to hack together an Observable notebook that can do everything that NUFORC Bot did + MORE 👽.
+
+# Import From Observable
+
+It's kind of amazing how little code is needed to create the random report above.
+
+1.  Importing two functions from [my Observable Notebook](https://observablehq.com/@mroumaya/random-ufo)
+2.  Reading data with `d3`. This could also be done in R but is more concise in a single chunk, and I'm planning to use [`ojs_define()`](https://quarto.org/docs/interactive/ojs/data-sources.html#python-and-r) in a later post.
+
+```ojs
+import { selectRandom, addHeader } from "@mroumaya/random-ufo"
+
+ufoReport = d3.csv('https://raw.githubusercontent.com/mattroumaya/mufonbot/master/data_raw/links.csv')
+
+ufo = addHeader(selectRandom(ufoReport));
+```
+
+3.  The only other code that's needed is some HTML to display the NUFORC report data. Observable has a Hypertext Literal implementation that I definitely didn't leverage correctly, but looks like this:
+
+```ojs
+//| eval: false
+htl.html`<h3 class='header'></h3>
+
+<div class="date"></div>
+
+
+<div class="shape"></div>
+
+
+<div class="duration"></div>
+
+<br>
+
+<a class="report-link">Link to Report</a>
+
+<br>
+
+<a class="raw-link">Link to Image</a>
+
+<br>
+
+<br>
+
+<div class="summary"></div>
+
+<img id="ufo-img" style="height: 500px">
+
+<br>`
+```

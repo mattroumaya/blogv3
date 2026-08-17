@@ -1,0 +1,39 @@
+---
+title: "A Sort(a) Useful Trick"
+author: "Matt Roumaya"
+date: "03-05-2022"
+categories: [R, snippet]
+image: "image.jpeg"
+---
+
+import { YouTube } from "astro-embed";
+
+My blog is depressingly stagnant and I want to make more of an effort to just post things without putting too much thought into it.
+
+For that reason, this post will be **extremely** brief, and will just show a useful trick that uses `dput()`, which was unfamiliar to me until I started looking for ways to contribute to the `R` tag on [stackoverflow](https://stackoverflow.com/users/12967938/matt).
+
+Here's the sort(a)-scenario:
+
+Let's say you have a vector that's built into your code that you'd like to sort. I've been stuck on an idea for a blog post about Saves the Day, and have a vector that contains body parts.
+
+<YouTube id="NwW0q65VIas" />
+
+```r
+parts <- c("neck", "collarbone", "ankle", "thigh", "eyelid")
+```
+
+I like order in the world, and want to build this vector alphabetically, which will also make it easier to read as it's presented in a blog post.
+
+Instead of doing your A-B-C's and manually rewriting the vector, just use `dput()`!
+
+```r
+dput(sort(parts))
+```
+
+Easy!
+
+Now we can just copy/paste and move on with our lives!
+
+```r
+ordered_parts <- c("ankle", "collarbone", "eyelid", "neck", "thigh")
+```

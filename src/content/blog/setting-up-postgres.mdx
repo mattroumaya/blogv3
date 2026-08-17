@@ -1,0 +1,63 @@
+---
+title: "Installing PostgreSQL with Homebrew on a Mac M1"
+author: "Matt Roumaya"
+date: "03-26-2024"
+categories: [postgres, MacOS]
+---
+
+I had some trouble setting up PostgreSQL via Homebrew and am documenting the steps for future reference (and maybe it'll help someone)!
+
+## Install via Homebrew 🏠🍺:
+
+I'm installing [`v16`](https://postgresql.org/about/news/postgresql-16-released-2715/).
+
+```zsh
+# check and update homebrew
+brew doctor
+brew update
+
+# install postgresql@16
+brew install postgresql@16
+```
+
+## Start Services
+
+Start postgresql now that everything is installed:
+
+```zsh
+brew services start postgresql@16
+```
+
+This is where I encountered my issue, which was that the `PATH` was not set, so all PostgreSQL terminal commands were not recognized (despite looking like all is well after starting `brew services`).
+
+## Find Path
+
+To resolve this, I needed to find the `/bin` where postgres is installed:
+
+```zsh
+ sudo find / -name pg_config
+```
+
+This returned a few matches, but the one I needed was: `/System/Volumes/Data/opt/homebrew/Cellar/postgresql@16/16.2_1/bin/pg_config`
+
+To set a persistent path, I ran:
+
+```zsh
+open ~/.zshrc
+```
+
+... and pasted:
+
+```zsh
+export PATH=$PATH:/System/Volumes/Data/opt/homebrew/Cellar/postgresql@16/16.2_1/bin/
+```
+
+Now it should work! Check it with:
+
+```zsh
+psql --version
+```
+
+## Learning More
+
+I have [phillymetal](https://phillymetal.net/) on Supabase, but have been thinking of making a similar resource for jazz music in the area. I'd like to learn how to develop a database outside of a hosted platform and deploy it with Docker, so that's my tentative plan.
