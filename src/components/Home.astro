@@ -1,18 +1,27 @@
 ---
-import { Image } from "astro:assets";
-import me from "../assets/me1.jpeg";
+import { Image, Font } from "astro:assets";
+import me from "../assets/me-icecream.png";
 ---
 
+<head>
+  <Font cssVariable="--font-rubik-beastly" preload />
+</head>
+<style>
+  h1 {
+    font-family: var(--font-rubik-beastly);
+    text-align: center;
+  }
+</style>
 <div class="about">
+  <h1>Matt Roumaya</h1>
   <p>
-    I'm <b>Matt Roumaya</b>, a Software Engineer based in Philadelphia.
+    I'm <b>Matt</b>, a Software Engineer based in Philadelphia.
     <br />
-     Working as a software engineer in PK/PD analysis & modeling.
   </p>
+  <Image
+    class="about-img"
+    src={me}
+    alt="black and white photo of matt roumaya at philadelphia museum of art"
+    width="400"
+  />
 </div>
-<Image
-  class="about-img"
-  src={me}
-  alt="black and white photo of matt roumaya at philadelphia museum of art"
-  width="400"
-/>
