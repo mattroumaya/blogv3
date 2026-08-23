@@ -1,0 +1,48 @@
+---
+title: AI & Unit Testing Verbosity
+author: Matt Roumaya
+date: 08-22-2026
+categories: AI, LLM, Testing, Software Development
+---
+
+At work, I spent a day or so updating a `npm` package that contained a bunch of peer dependencies. I have been using AI more deliberately and less often as a means of upskilling myself rather than training LLMs. 
+
+When I did reach for Cursor, I noticed a behavior that compelled me to type up a quick post, mostly so I remember to investigate my hypothesis. 
+
+What I found was that agents consistently run entire frontend + backend testing suites to "validate" very small increments of work, which obviously wastes a lot of time, and even worse, I suspect that unit test output is bloating context windows and leading to a polluted context for the agent, as well as a waste of money (tokens... tokens are money!). Even with prompting that I think was adequate enough, but maybe not a spec-driven directive, I wouldn't expect Java unit tests to run based on `npm` changes.
+
+Even with a bunch of specific `rules.mdc` files that define rules to:
+- etc
+- only run the entire testing suite during a final verification step
+- only run unit tests for affected files/modules
+- only test certain behaviors based on product requirements
+
+I have a few ideas about this, some of which I think are rational and some are honestly paranoid thoughts that assume the worst of the technocrat overlords that run frontier AI shops:
+1. Companies have every motivation ($) to overemphasize code output metrics, and unit tests are probably the area most likely to be accepted into the codebase. After all, they're helpful, prevent bugs, and are unlikely to affect production, right? (Not right)
+2. More code = more context pulled into the context window = higher token usage. 
+3. Ineffective prompting: unit tests can really be deprioritized when there are other factors at play, like timelines and requirements that frequently change. Prompting *write unit tests for these new files/functions/methods* generally produces LOTS of slop. 
+
+This is all just half-brained speculation based on my experience recently. I'm going to investigate this more by doing some experiments and reading more articles and research papers. I'm not a gambler, but would bet that this becomes a bigger problem as codebases mature with AI-driven code development. 
+
+---
+## Further Reading 
+
+I've read some of these, but just collecting some resources for when I come back to this.
+
+- [Agentic test processes, LLM benchmarks, and other notes on agentic coding from Galapagos Island](https://danluu.com/ai-coding/)
+- [AI-Assisted Unit Test Writing and Test-Driven Code Refactoring: A Case Study](https://arxiv.org/html/2604.03135v1)
+- [An Empirical Evaluation of Using Large Language Models for Automated Unit Test Generation](https://www.alphaxiv.org/abs/2302.06527)
+- [An Empirical Study of Unit Test Generation with Large Language Models](https://arxiv.org/html/2406.18181v1)
+- [A Review of Large Language Models for Automated Test Case Generation](https://www.semanticscholar.org/paper/A-Review-of-Large-Language-Models-for-Automated-Celik-Mahmoud/49c7ba3b6babda46a449850eb14be0ca04f3bc6d)
+- [Benchmarking LLMs for Unit Test Generation from Real-World Functions](https://dl.acm.org/doi/10.1145/3805043)
+- [Budget-aware Test-Sufficient Context Selection for Java Unit Test Generation](https://www.semanticscholar.org/paper/Budget-aware-Test-Sufficient-Context-Selection-for-Wang-Guo/1c5ba80cb6a2f9c0606118c3e8a42622d01f3909)
+- [Do Coverage and Mutation Scores of LLM-Generated Test Suites Correlate with Their Effectiveness?](https://www.semanticscholar.org/paper/Do-Coverage-and-Mutation-Scores-of-LLM-Generated-Zhao-Zhou/3be0be0fb8b6f66c0534ba8b4c2134edd8891e17)
+- [Do influence tactics matter? investigating prompt framing effects in LLM code generation](https://www.semanticscholar.org/paper/Do-influence-tactics-matter-investigating-prompt-in-Deaconu-Gupta/f962d4c80acd830995e4167e364f21b8bbf8cf2d)
+- [Don't Let an LLM Write Your Unit Tests](https://www.mattblodgett.com/2025/04/dont-let-llm-write-your-unit-tests.html)
+- [Effective test generation using pre-trained Large Language Models and mutation testing](https://www.sciencedirect.com/science/article/abs/pii/S0950584924000739)
+- [Impact Assessment of Structured Results for the Reliability of LLM-generated Tests](https://www.semanticscholar.org/paper/Impact-Assessment-of-Structured-Results-for-the-of-Zapkus-Slotkien%C4%97/b42c74f8681a8d1d93aa3355211636c7f9ba824f)
+- [Prompt engineering in LLMs for automated unit test generation: A large-scale study](https://link.springer.com/article/10.1007/s10664-026-10840-4) (some interesting links to Java-based unit test resources in this one)
+- [Stop Vibe Coding Your Unit Tests](https://www.andy-gallagher.com/blog/stop-vibe-coding-your-unit-tests/)
+- [Test case generation using large language models: a systematic literature review](https://www.semanticscholar.org/paper/Test-case-generation-using-large-language-models%3A-a-Tasarsu-Tokmak/8e04f63639df44b49f5e61ef2d6e25a82a526f3b)
+
+
