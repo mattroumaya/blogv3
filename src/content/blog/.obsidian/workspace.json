@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "AI & Unit Test Verbosity.mdx",
+                "file": "Weekend Recap.mdx",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "AI & Unit Test Verbosity"
+              "title": "Weekend Recap"
             }
           }
         ]
@@ -99,7 +99,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "AI & Unit Test Verbosity.mdx",
+                "file": "Weekend Recap.mdx",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -118,7 +118,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "AI & Unit Test Verbosity.mdx",
+                "file": "Weekend Recap.mdx",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -161,7 +161,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "AI & Unit Test Verbosity.mdx",
+                "file": "Weekend Recap.mdx",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -191,9 +191,11 @@
   },
   "active": "22b15e7006edbb9b",
   "lastOpenFiles": [
+    "AI & Unit Test Verbosity.mdx",
+    "Weekend Recap.md",
+    "Weekend Recap.mdx",
     "Things I'm Learning.mdx",
     "AI & Unit Test Verbosity.md",
-    "AI & Unit Test Verbosity.mdx",
     "Untitled.canvas",
     "Things I'm Learning.md",
     "Untitled.base",
