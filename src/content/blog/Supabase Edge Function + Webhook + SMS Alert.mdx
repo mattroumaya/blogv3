@@ -1,0 +1,165 @@
+---
+title: Supabase Edge Function + Webhook + SMS Alert
+author: Matt Roumaya
+date: 08-25-2026
+categories: supabase, phillymetal, database, typescript, javascript, deno
+---
+
+import { Image } from "astro:assets";
+import repo from "../../assets/edge-function-basic-repo.png";
+import diagram from "../../assets/edge-supabase-architecture.png";
+
+[Phillymetal](https://phillymetal.com/) is one of my hobby projects, and was created and maintained as an entirely free, open-source index of heavy music shows in the Philadelphia area.
+
+The high-level tech stack is:
+
+- React frontend
+- Supabase backend (free tier)
+- Hosted on Netlify
+
+The only cost incurred is the annual domain renewal, which is less than $20.
+
+---
+
+Anyone can go to phillymetal.com and add a show, and I love when people do this! The whole ethos is about making it easy for music fans to find shows, so the more the merrier. However, right now, when a new row is inserted into the database from the form, it has a field set for validation so that my site can't be spammed. Shows are only added once I review the database record (to make sure it's in the area and not a duplicate entry. I also like to add a flier for the show if one is available)
+
+I tried to do this in the past but gave up, so I'm going to live-blog my attempt at using a Supabase webhook and Twilio's API + SDK to send me a text whenever a new row is inserted. Mostly stream-of-conciousness/half-assed documentation and notes below!
+
+Here we go...
+
+---
+
+Here's a simple flow of what I'm intending to build. This is probably too simple to need to illustrate, but it helps me to refer back to a visual reference when I'm working through stages of a solution.
+
+<Image src={diagram} alt="diagram of intended architecture" width="680px" />
+
+### Step 1: Sign up for Twilio
+
+- Signed up for a free account at [Twilio](https://www.twilio.com/en-us). Texts are less than a penny each, and I only get a handful of submissions per month, so I should be well within budget for this endeavor. If I'm spending more than $1 per month I'd actually be thrilled (and surprised).
+
+### Step 2: Create Supabase Webhook
+
+I'm going to call this webhook `new-show-alert`. I already installed the [Supabase CLI](https://supabase.com/docs/guides/local-development), and a container manager is a requirement for the CLI. I'm gonna stick with [Docker](https://docs.docker.com/) since I'm most familiar with it.
+
+1. ~~Open Docker, then launch the cli with `supabase start`.~~
+2. ~~Create the function with `supabase functions new new-show-alert`.~~
+
+~~Success! `Created new Function at **supabase/functions/new-show-alert**`  🎉~~
+
+Nevermind... attempt 2 below. I didn't initialize a standalone directory for my Supabase project so I need to backtrack a bit. The end result should be a repository with a Typescript `index.tsx` file that orchestrates the webhook.
+
+1. Create new directory.
+2. Run `supabase init`.
+3. NOW I can create my new edge function with `supabase functions new new-show-alert`. Success again, less exciting this time.
+
+### Step 3: Configure Deno + Twilio POST
+
+Now I have a proper directory with my Supabase edge function, and I opened the folder in my IDE (VSCode).
+
+It looks like this:
+
+<Image
+  src={repo}
+  alt="structure of starting Supabase Edge Function repo"
+  width="680px"
+/>
+
+1. Install `dotenv` to manage Twilio credentials - run `npm i dotenv`.
+2. The Twilio SMS docs require a SID key, auth token, and Twilio virtual/phone number that will be sending the messages, so I'm going to poke around and find them, then assign them with `dotenv`.
+3. I found some boilerplate for sending a SMS and modified to my liking:
+
+```tsx
+const TWILIO_SID = Deno.env.get("TWILIO_SID")!;
+const TWILIO_PHONE_NUMBER = Deno.env.get("TWILIO_PHONE_NUMBER")!;
+const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN")!;
+const MY_PHONE_NUMBER = Deno.env.get("MY_PHONE_NUMBER")!;
+
+Deno.serve(async (req) => {
+  try {
+    const { showInfo } = await req.json();
+
+    const body = `🚨 New show submitted 🚨\n date: ${showInfo.date}\n venue: ${showInfo.venue}\n description: ${showInfo.description}`;
+
+    const formData = new URLSearchParams();
+    formData.append("To", MY_PHONE_NUMBER);
+    formData.append("From", TWILIO_PHONE_NUMBER);
+    formData.append("Body", body);
+
+    const authHeader = btoa(`${TWILIO_SID}:${TWILIO_AUTH_TOKEN}`);
+
+    const twilioResponse = await fetch(
+      `https://twilio.com{TWILIO_ACCOUNT_SID}/Messages.json`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Basic ${authHeader}`,
+        },
+        body: formData.toString(),
+      }
+    );
+
+    const result = await twilioResponse.json();
+
+    return new Response(JSON.stringify({ success: true, sid: result.sid }), {
+      headers: { "Content-Type": "application/json" },
+      status: 200,
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      headers: { "Content-Type": "application/json" },
+      status: 500,
+    });
+  }
+});
+```
+
+Backtracking to step 2b: Supabase actually reads environment variables that are stored via Deno, so I need to also set them in the CLI. My `dotenv` config should help me test this locally first, so I can hopefully avoid some deploy-and-repeat frustration.
+
+I set them up, including one for my phone number that will be receiving texts, using `supabase screts set KEY=VALUE`.
+
+Finally, I'm deploying the function with `supabase functions deploy new-show-alert`. (I ran into a snag here and had to adjust my Docker permissions in my privacy settings).
+
+### Step 4: Create Webhook
+
+Now I can create a webhook that uses the edge function created above. So far, I'm kind of moving in the dark because I decided not to test this locally, because I'm excited and want to see if this just works. I do think I'll need to update my function to only send after looking for the `validated` field that tells me whether I'm updating the database myself or if it is submitted by a site visitor.
+
+### Debugging
+
+1. The first error I ran into:
+
+```
+const { showInfo } = await req.json();
+```
+
+`showInfo` is undefined :(
+
+I want to check to see if the Twilio integration is going to work before I get into more details. Thinking I may need to add headers/POST content somewhere in the Typescript/Deno function.
+
+```tsx
+const { showInfo } = await req.json();
+
+const formData = new URLSearchParams();
+formData.append("To", MY_PHONE_NUMBER);
+formData.append("From", TWILIO_PHONE_NUMBER);
+
+if (showInfo !== undefined) {
+  const body = `🚨 New show submitted 🚨\n date: ${showInfo.date}\n venue: ${showInfo.venue}\n description: ${showInfo.description}`;
+  formData.append("Body", body);
+} else {
+  formData.append("Body", "new show added.");
+}
+```
+
+2. Second debugging attempt looks like the above, just with a lot more `console.logs()`. Still getting a nebulous "shutdown error" message, with not much else.
+
+Turns out I just didn't destructure `req.json()` correctly. Doh.
+
+3. Third attempt is a 500 error. I've reached Twilio and now there is probably some issue with the config.
+
+I think I used an old version of the boilerplate/Twilio API docs, so I'm going to update the edge function with the new format. I also installed the Twilio cli to verify that I'm using the correct virtual number.
+
+4. Welp. Turns out I need to update from Twilio's trial, so I forked over $20. This should hopefully last me several years!
+5. I skipped a few boring steps here, but ended up needing to verify my identity in order to send texts. This does make sense to me practically, but based on the sheer number of spam + junk texts I receive every day, I have to believe that there is an easier way. I have plans to setup a photoblog for my wife that she can orchestrate entirely from her phone via text though, and I think Twilio is going to be a good candidate for these (near) future plans.
+
+### To be continued...
