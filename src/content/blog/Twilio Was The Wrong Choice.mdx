@@ -1,0 +1,90 @@
+---
+Author: Matt Roumaya
+title: Twilio Was The Wrong Choice
+date: 08-27-2026
+categories: phillymetal, supabase, database, javascript, typescript, twilio, ntfy.sh
+---
+
+import { Image } from "astro:assets";
+import screenshot from "../../assets/twilio-wrong-choice-sms.jpeg";
+
+This is part II of my stream-of-conciousness/not-very-thought-out series about sending a SMS notification to myself using a Supabase Edge Function + Webhook.
+
+### Why Not Twilio?
+
+- I purchased a number from which I was hopefully going to send SMS messages from, but then had to fill out a few pages of verification forms. This was pretty involved and asked me to link to my terms of service (I don't have one), and provide sample messages that I intend to send.
+- Instead of spending a lot of time on this, I tried to handwaive the requirements and make my intention clear - that I would simply be messaging myself and no one else, so I am implicitly opting in.
+- My case was rejected by Twilio and after a bit more online research, I've found that this really isn't a good solution for a solo endeavor and that Twilio seems to be much more geared towards enterprise solutions.
+
+### Next up: ntfy.sh
+
+Someone posted about [ntfy.sh](https://docs.ntfy.sh/) on Reddit, and this seems like it's a better fit. It appears to be a simple POST that goes to a unique topic on their API, which triggers a push notification from their specific app. I just want to get over this hurdle and then might take a look at some other service that sends an email or sms, but based on the documentation, this seems simple and quick to get up and running.
+
+1. Downloaded the app on my phone.
+2. Created a new topic: `philly-metal-new-show`.
+3. Updated my edge function to the following:
+
+```tsx
+Deno.serve(async (req) => {
+  try {
+    const payload = await req.json();
+    console.log("payload:", JSON.stringify(payload, null, 2));
+
+    const { record } = payload;
+    console.log("record:", JSON.stringify(record, null, 2));
+
+    const body =
+      `🚨 New show submitted 🚨\n` +
+      `date: ${record.show_date}\n` +
+      `venue: ${record.venue}\n` +
+      `description: ${record.description}\n` +
+      `url: ${record.url}`;
+
+    console.log("body:", body);
+
+    const response = await fetch("https://ntfy.sh/philly-metal-new-show", {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+      },
+      body,
+    });
+
+    if (!response.ok) {
+      throw new Error(`ntfy failed with status ${response.status}`);
+    }
+
+    return new Response(JSON.stringify({ message: "Notification sent" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+
+    console.error("Function error:", error);
+
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+});
+```
+
+This worked! I like this quite a lot, though it's not the full-fledged SMS feature I had in mind. I'm happy that this was another free solution, even though I lost $20 to Twilio that I will hopefully be able to use for Molly's photo blog.
+
+Here's evidence of the end-to-end feature!
+
+<Image
+  src={screenshot}
+  alt="screenshot of ntfy.sh app with notification from phillymetal"
+  width="340px"
+/>
+
+### One Caveat
+
+I received some 429 errors due to being rate limited. From what I can tell, this is because the IP address for the Supabase webhook is static, so it seems to be the same for a large userbase of Supabase users, meaning if others are spamming the free-tier notification service, I might be rate limited and have my POST request returned with a 429.
+
+I may end up self-hosting, or seeing if there is a way of provisioning a specific IP address to avoid the issue.
+
+Props to ntfy.sh for a really awesome open-source framework! 
