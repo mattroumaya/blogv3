@@ -1,0 +1,63 @@
+---
+author: Matt Roumaya
+date: 09-01-2026
+title: Self-Hosting phillymetal Postgres on Hetzner Cloud
+categories: postgres, supabase, Hetzner, ntfy.sh, node, express, vps, phillymetal
+---
+
+import { Image } from "astro:assets";
+import prices from "../../assets/self-hosting-hetzner-pricing.png";
+import dashboard from "../../assets/self-hosting-dokploy-dashboard.png";
+
+A couple days ago I [posted](https://www.mattroumaya.com/blog/supabase-edge-function--webhook--sms-alert/) about setting up a Supabase edge function that sends me a notification using `ntfy.sh` whenever someone [submits a show to phillymetal](https://phillymetal.com/add).
+
+Setting this up was mostly straightforward, but I did run into some rate-limiting issues which resulted in 429 HTTP errors, which took a minute to understand. I haven't fully figured this out yet, but am assuming that all of the edge functions are called from the same IP address, so the totality of Supabase users contributes to the rates that `ntfy.sh` has in place, which can cause unexplained irregularity for my notification service.
+
+This issue, plus the inevitability of needing to shell out $25/month for Supabase whenever I reach the storage limit for their free tier, made me interested in exploring other alternatives.
+
+I landed on a [Hetzner Cloud Cost-Optimized service](https://www.hetzner.com/cloud/cost-optimized/), coming in at ~$8/month. The value for this is pretty nice!
+
+- 2 vCPUs
+- 4gm RAM
+- 40gb storage
+- $7.09/month
+
+---
+
+## Current State
+
+For now, I only migrated my Supabase DB to a self-managed postgres DB on Hetzner. I also made an Express API that I hope to use in the future to let visitors search for bands to see if they are playing, and also add more capabilities to make the archive more fun and easier to use.
+
+The frontend is still hosted via Netlify, because that's where I purchased the domain from and it makes deployment pretty seamless.
+
+For both the database and API, I used [Dokploy](https://dokploy.com/) which sets up automatic deployment triggered by a git push to `main`. I really like the UI and all of the easy access to DNS, encryption, logs, and anything you might want to configure for an application or DB.
+
+<Image src={dashboard} alt="Dokploy dashboard" width="680px" />
+
+## Database Table Migration
+
+Migrating data from Supabase to my postgres database was easy, mostly because the entire app runs off of just one table. All I needed to do was create an identical table and used a `.csv` to migrate the data. If this app was complicated in any sense, I would have done a more thorough migration with QC checks/logging/all that. But why make something complicated when it doesn't have to be?
+
+## Node.js Express API
+
+I've wanted to stand up an API layer for this application for a while, and having more control over the backend made this way easier. I set up an `api` DNS entry for phillymetal, and a few endpoints:
+
+1. `GET` for all shows that have happened in the past, used for the Archive page.
+2. `GET` for all upcoming shows, used for the homepage/show listings.
+3. `POST` to allow users to submit a show that isn't on the list.
+
+For the POST endpoint, I was able to add my existing edge function and hooked it up with `ntfy.sh` in a matter of minutes. It was a copy/paste job with some minor modifications, and this should fully resolve my issue with the Supabase IP throttle, especially since my site is not high traffic at all.
+
+The last thing I will need to do is update the CLI I made to automate my newsletter template, which I wrote about previously [here](https://www.mattroumaya.com/blog/how-i-use-mailerlite/).
+
+## What I Learned
+
+- Some new Linux concepts (I'm a Linux noob).
+- Better understanding of DNS + SSL/TLS configuration.
+- Wrote my first postgres stored procedure that I will use to add new shows to phillymetal.
+
+## What's Next
+
+- In progress is a photoblog that I'm making for my wife. Excited to build this more, and will write about it once it's in a decent state.
+- Planning to host a new splash page for a music project I'm in.
+- Considering migrating this blog, and maybe everything else to my single VPS. This scares me because a single failure could take down all of my projects at once, but I also like the challenge of building resilient infrastructure to try to prevent that from ever happening.

@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Supabase Was (Probably) The Wrong Choice.md",
+                "file": "Self-Hosting phillymetal Postgres on Hetzner Cloud.mdx",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Supabase Was (Probably) The Wrong Choice"
+              "title": "Self-Hosting phillymetal Postgres on Hetzner Cloud"
             }
           }
         ],
@@ -207,8 +207,9 @@
   },
   "active": "088fd1beafb08301",
   "lastOpenFiles": [
-    "Supabase Edge Function + Webhook + SMS Alert.mdx",
     "Supabase Was (Probably) The Wrong Choice.md",
+    "Self-Hosting phillymetal Postgres on Hetzner Cloud.mdx",
+    "Supabase Edge Function + Webhook + SMS Alert.mdx",
     "Twilio Was The Wrong Choice.mdx",
     "Things I'm Learning.mdx",
     "Excalidraw/supabase-architecture.md",
@@ -224,7 +225,6 @@
     "Untitled.canvas",
     "Things I'm Learning.md",
     "Untitled.base",
-    "Porting to Astro.mdx",
     "What I think about AI at this exact point in time.md",
     "porting-to-astro.md",
     "# Porting to Astro.md"
